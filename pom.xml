@@ -1,0 +1,100 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.github.zubnix</groupId>
+    <artifactId>rtcdcjava</artifactId>
+    <packaging>jar</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>rtcdcjava</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <!-- runtime -->
+        <ice4j.version>1.0</ice4j.version>
+        <java-sdp-nist-bridge.version>1.2</java-sdp-nist-bridge.version>
+        <jaccall.runtime.version>1.0.5</jaccall.runtime.version>
+        <bcprov-jdk15on.version>1.56</bcprov-jdk15on.version>
+
+        <!-- test -->
+        <junit.version>4.12</junit.version>
+
+        <!-- compile time -->
+        <jaccall.generator.version>1.0.5</jaccall.generator.version>
+        <auto.value.version>1.2</auto.value.version>
+
+        <!-- plugins -->
+        <maven-compiler-plugin.version>3.6.1</maven-compiler-plugin.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jitsi</groupId>
+            <artifactId>ice4j</artifactId>
+            <version>${ice4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.opentelecoms.sdp</groupId>
+            <artifactId>java-sdp-nist-bridge</artifactId>
+            <version>${java-sdp-nist-bridge.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.freedesktop</groupId>
+            <artifactId>jaccall.runtime</artifactId>
+            <version>${jaccall.runtime.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>${bcprov-jdk15on.version}</version>
+        </dependency>
+
+        <!-- compile time -->
+        <dependency>
+            <groupId>com.google.auto.value</groupId>
+            <artifactId>auto-value</artifactId>
+            <version>${auto.value.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- test -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+
+                    <compilerArgument>-Xlint:all</compilerArgument>
+                    <showWarnings>true</showWarnings>
+                    <showDeprecation>true</showDeprecation>
+
+                    <useIncrementalCompilation>false</useIncrementalCompilation>
+
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.freedesktop</groupId>
+                            <artifactId>jaccall.generator</artifactId>
+                            <version>${jaccall.generator.version}</version>
+                        </path>
+                        <path>
+                            <groupId>com.google.auto.value</groupId>
+                            <artifactId>auto-value</artifactId>
+                            <version>${auto.value.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
