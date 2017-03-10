@@ -1,10 +1,42 @@
 package com.github.zubnix.rtcdcjava;
 
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 public class DataChannel implements AutoCloseable {
+
+    private final PeerConnection peerConnection;
+    private final short          streamId;
+    private final byte           channelType;
+    private final String         label;
+    private final String         protocol;
+
+    @Nonnull
+    private Optional<OnDataChannelOpen>              onDataChannelOpen              = Optional.empty();
+    @Nonnull
+    private Optional<OnDataChannelStringMessage>     onDataChannelStringMessage     = Optional.empty();
+    @Nonnull
+    private Optional<OnDataChannelByteBufferMessage> onDataChannelByteBufferMessage = Optional.empty();
+    @Nonnull
+    private Optional<OnDataChannelClosed>            onDataChannelClosed            = Optional.empty();
+    @Nonnull
+    private Optional<OnDataChannelErrorMessage>      onDataChannelErrorMessage      = Optional.empty();
+
+    DataChannel(final PeerConnection peerConnection,
+                final short streamId,
+                final byte channelType,
+                final String label,
+                final String protocol) {
+
+        this.peerConnection = peerConnection;
+        this.streamId = streamId;
+        this.channelType = channelType;
+        this.label = label;
+        this.protocol = protocol;
+    }
 
     /**
      * Get the Stream ID for the DataChannel.
@@ -12,7 +44,7 @@ public class DataChannel implements AutoCloseable {
      * @return XXX: Stream IDs *are* unique.
      */
     public short getStreamId() {
-        return 0;
+        return this.streamId;
     }
 
     /**
@@ -21,7 +53,7 @@ public class DataChannel implements AutoCloseable {
      * @return
      */
     public byte getChannelType() {
-        return 0;
+        return this.channelType;
     }
 
     /**
@@ -30,7 +62,7 @@ public class DataChannel implements AutoCloseable {
      * @return XXX: Labels are *not* unique.
      */
     public String getLabel() {
-        return "";
+        return this.label;
     }
 
     /**
@@ -39,7 +71,7 @@ public class DataChannel implements AutoCloseable {
      * @return
      */
     public String getProtocol() {
-        return "";
+        return this.protocol;
     }
 
     /**
@@ -50,7 +82,8 @@ public class DataChannel implements AutoCloseable {
      * @throws IOException
      */
     void send(String message) throws IOException {
-
+        this.peerConnection.send(message,
+                                 this.streamId);
     }
 
     /**
@@ -61,7 +94,28 @@ public class DataChannel implements AutoCloseable {
      * @throws IOException
      */
     void send(ByteBuffer message) throws IOException {
+        this.peerConnection.send(message,
+                                 this.streamId);
+    }
 
+    void onOpen() {
+        this.onDataChannelOpen.ifPresent(OnDataChannelOpen::onDataChannelOpen);
+    }
+
+    void on(final String message) {
+        this.onDataChannelStringMessage.ifPresent(callback -> callback.onDataChannel(message));
+    }
+
+    void on(final ByteBuffer message) {
+        this.onDataChannelByteBufferMessage.ifPresent(callback -> callback.onDataChannel(message));
+    }
+
+    void onClose() {
+        this.onDataChannelClosed.ifPresent(OnDataChannelClosed::onDataChannelClosed);
+    }
+
+    void onError(final String message) {
+        this.onDataChannelErrorMessage.ifPresent(callback -> callback.onDataChannelError(message));
     }
 
     /**
@@ -72,8 +126,8 @@ public class DataChannel implements AutoCloseable {
      *
      * @param onDataChannelOpen
      */
-    public void set(OnDataChannelOpen onDataChannelOpen) {
-
+    public void set(@Nonnull OnDataChannelOpen onDataChannelOpen) {
+        this.onDataChannelOpen = Optional.of(onDataChannelOpen);
     }
 
     /**
@@ -81,8 +135,8 @@ public class DataChannel implements AutoCloseable {
      *
      * @param onDataChannelStringMessage
      */
-    public void set(OnDataChannelStringMessage onDataChannelStringMessage) {
-
+    public void set(@Nonnull OnDataChannelStringMessage onDataChannelStringMessage) {
+        this.onDataChannelStringMessage = Optional.of(onDataChannelStringMessage);
     }
 
     /**
@@ -90,8 +144,8 @@ public class DataChannel implements AutoCloseable {
      *
      * @param onDataChannelByteBufferMessage
      */
-    public void set(OnDataChannelByteBufferMessage onDataChannelByteBufferMessage) {
-
+    public void set(@Nonnull OnDataChannelByteBufferMessage onDataChannelByteBufferMessage) {
+        this.onDataChannelByteBufferMessage = Optional.of(onDataChannelByteBufferMessage);
     }
 
     /**
@@ -101,8 +155,8 @@ public class DataChannel implements AutoCloseable {
      *
      * @param onDataChannelClosed
      */
-    public void set(OnDataChannelClosed onDataChannelClosed) {
-
+    public void set(@Nonnull OnDataChannelClosed onDataChannelClosed) {
+        this.onDataChannelClosed = Optional.of(onDataChannelClosed);
     }
 
     /**
@@ -111,8 +165,8 @@ public class DataChannel implements AutoCloseable {
      *
      * @param onDataChannelErrorMessage
      */
-    public void set(OnDataChannelErrorMessage onDataChannelErrorMessage) {
-
+    public void set(@Nonnull OnDataChannelErrorMessage onDataChannelErrorMessage) {
+        this.onDataChannelErrorMessage = Optional.of(onDataChannelErrorMessage);
     }
 
     @Override
