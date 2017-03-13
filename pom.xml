@@ -14,6 +14,7 @@
         <java-sdp-nist-bridge.version>1.2</java-sdp-nist-bridge.version>
         <jaccall.runtime.version>1.0.5</jaccall.runtime.version>
         <bcprov-jdk15on.version>1.56</bcprov-jdk15on.version>
+        <bcpkix-jdk15on.version>1.56</bcpkix-jdk15on.version>
 
         <!-- test -->
         <junit.version>4.12</junit.version>
@@ -46,6 +47,11 @@
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
             <version>${bcprov-jdk15on.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk15on</artifactId>
+            <version>${bcpkix-jdk15on.version}</version>
         </dependency>
 
         <!-- compile time -->
