@@ -1,21 +1,25 @@
 package com.github.zubnix.rtcdcjava;
 
 
-import java.nio.ByteBuffer;
+import javax.annotation.Nonnull;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class PeerConnection {
 
+    private final DTLSTransportFactory dtlsTransportFactory = new DTLSTransportFactory();
 
     private final RTCConfiguration rtcConfiguration;
-    private final OnIceCandidate   onIceCandidate;
-    private final OnDataChannel    onDataChannel;
 
-    public static PeerConnection create(OnIceCandidate onIceCandidate,
-                                        OnDataChannel onDataChannel) {
-        //createClientTransport default config
+    @Nonnull
+    private Optional<OnIceCandidate> onIceCandidate = Optional.empty();
+    @Nonnull
+    private Optional<OnDataChannel>  onDataChannel  = Optional.empty();
+
+    public static PeerConnection create() {
+        //create default config
         List<RTCTurnServer> rtcTurnServers = Arrays.asList(RTCTurnServer.create("stun.l.google.com",
                                                                                 19302),
                                                            RTCTurnServer.create("stun1.l.google.com",
@@ -38,39 +42,45 @@ public class PeerConnection {
                                                                           icePassword,
                                                                           rtcCertificates);
 
-        return create(rtcConfiguration,
-                      onIceCandidate,
-                      onDataChannel);
+        return create(rtcConfiguration);
     }
 
-    public static PeerConnection create(RTCConfiguration rtcConfiguration,
-                                        OnIceCandidate onIceCandidate,
-                                        OnDataChannel onDataChannel) {
+    public static PeerConnection create(RTCConfiguration rtcConfiguration) {
 
-        return new PeerConnection(rtcConfiguration,
-                                  onIceCandidate,
-                                  onDataChannel);
+        return new PeerConnection(rtcConfiguration);
     }
 
-    private PeerConnection(final RTCConfiguration rtcConfiguration,
-                           final OnIceCandidate onIceCandidate,
-                           final OnDataChannel onDataChannel) {
+    private PeerConnection(final RTCConfiguration rtcConfiguration) {
 
         this.rtcConfiguration = rtcConfiguration;
-        this.onIceCandidate = onIceCandidate;
-        this.onDataChannel = onDataChannel;
     }
 
     public RTCConfiguration getRtcConfiguration() {
         return rtcConfiguration;
     }
 
-    public OnDataChannel getOnDataChannel() {
+    public Optional<OnDataChannel> getOnDataChannel() {
         return onDataChannel;
     }
 
-    public OnIceCandidate getOnIceCandidate() {
+    public Optional<OnIceCandidate> getOnIceCandidate() {
         return onIceCandidate;
+    }
+
+    public void set(@Nonnull OnDataChannel onDataChannel) {
+        this.onDataChannel = Optional.of(onDataChannel);
+    }
+
+    public void set(@Nonnull OnIceCandidate onIceCandidate) {
+        this.onIceCandidate = Optional.of(onIceCandidate);
+    }
+
+    public void removeOnDataChannel() {
+        this.onDataChannel = Optional.empty();
+    }
+
+    public void removeOnIceCandidate() {
+        this.onIceCandidate = Optional.empty();
     }
 
     /**
@@ -93,17 +103,11 @@ public class PeerConnection {
      * Handle remote ICE Candidate.
      * Supports trickle ice candidates.
      */
-    public boolean setRemoteIceCandidate(String candidateSdp) {
+    public boolean addRemoteIceCandidate(String candidateSdp) {
         return false;
     }
 
-    void send(final String message,
-              final short streamId) {
-
-    }
-
-    void send(final ByteBuffer message,
-              final short streamId) {
-
+    public DataChannel createDataChannel() {
+        return null;
     }
 }
