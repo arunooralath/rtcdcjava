@@ -6,9 +6,11 @@ import org.bouncycastle.crypto.tls.Certificate;
 import org.bouncycastle.crypto.tls.CertificateRequest;
 import org.bouncycastle.crypto.tls.ClientCertificateType;
 import org.bouncycastle.crypto.tls.DTLSClientProtocol;
+import org.bouncycastle.crypto.tls.DTLSServerProtocol;
 import org.bouncycastle.crypto.tls.DTLSTransport;
 import org.bouncycastle.crypto.tls.DatagramTransport;
 import org.bouncycastle.crypto.tls.DefaultTlsClient;
+import org.bouncycastle.crypto.tls.DefaultTlsServer;
 import org.bouncycastle.crypto.tls.DefaultTlsSignerCredentials;
 import org.bouncycastle.crypto.tls.HashAlgorithm;
 import org.bouncycastle.crypto.tls.SignatureAlgorithm;
@@ -25,6 +27,19 @@ import java.security.SecureRandom;
 public class DTLSTransportFactory {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    public DTLSTransport createServerTransport(RTCCertificate rtcCertificate,
+                                               DatagramTransport transport) throws IOException {
+        final DefaultTlsServer defaultTlsServer = new DefaultTlsServer() {
+            @Override
+            public void notifyClientCertificate(final Certificate clientCertificate) throws IOException {
+                //TODO Check if certificate is signed by a trusted party.
+            }
+        };
+
+        return new DTLSServerProtocol(SECURE_RANDOM).accept(defaultTlsServer,
+                                                            transport);
+    }
 
     public DTLSTransport createClientTransport(RTCCertificate rtcCertificate,
                                                DatagramTransport transport) throws IOException {
