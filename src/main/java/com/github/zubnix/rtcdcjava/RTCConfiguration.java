@@ -7,25 +7,25 @@ import java.util.List;
 @AutoValue
 public abstract class RTCConfiguration {
 
-    public static RTCConfiguration create(List<RTCIceServer> rtcIceServers,
+    public static RTCConfiguration create(List<RTCTurnServer> rtcTurnServers,
                                           IcePortRange icePortRange,
                                           String iceUfrag,
                                           String icePwd,
                                           List<RTCCertificate> rtcCertificates) {
-        return new AutoValue_RTCConfiguration(rtcIceServers,
+        return new AutoValue_RTCConfiguration(rtcTurnServers,
                                               icePortRange,
                                               iceUfrag,
                                               icePwd,
                                               rtcCertificates);
     }
 
-    public abstract List<RTCIceServer> getIceServers();
+    public abstract List<RTCTurnServer> getTurnServers();
 
     public abstract IcePortRange getIcePortRange();
 
-    public abstract String iceUfrag();
+    public abstract String getIceUfrag();
 
-    public abstract String icePwd();
+    public abstract String getIcePassword();
 
     public abstract List<RTCCertificate> getRtcCertificates();
 }

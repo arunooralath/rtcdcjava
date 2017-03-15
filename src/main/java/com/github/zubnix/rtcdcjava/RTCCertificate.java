@@ -1,32 +1,42 @@
 package com.github.zubnix.rtcdcjava;
 
 
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.X509v1CertificateBuilder;
 import org.bouncycastle.crypto.digests.SHA256Digest;
+import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
+import org.bouncycastle.crypto.util.PrivateKeyFactory;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.DefaultDigestAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.bc.BcRSAContentSignerBuilder;
 import org.bouncycastle.util.encoders.Hex;
-import org.bouncycastle.x509.X509V1CertificateGenerator;
 
-import javax.security.auth.x500.X500Principal;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.math.BigInteger;
-import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
 public class RTCCertificate {
 
-    private final String          fingerPrint;
-    private final X509Certificate certificate;
+    private final String                fingerPrint;
+    private final KeyPair               keyPair;
+    private final X509CertificateHolder certificate;
 
-    public static String fingerprint(X509Certificate c)
+    public static String fingerprint(X509CertificateHolder c)
             throws IOException, CertificateEncodingException {
 
         byte[] der      = c.getEncoded();
@@ -66,38 +76,54 @@ public class RTCCertificate {
         return signedCertificatePEMDataStringWriter.toString();
     }
 
-    public static RTCCertificate generate(String commonName) throws NoSuchAlgorithmException, CertificateEncodingException, NoSuchProviderException, InvalidKeyException, SignatureException, IOException {
+    public static RTCCertificate generate(String commonName) {
 
-        //generate certificate
-        Date       startDate    = new Date(System.currentTimeMillis());// time from which certificate is valid
-        Date       expiryDate   = new Date(System.currentTimeMillis() + 365L * 24L * 60L * 60L * 1000L);// time after which certificate is not valid
-        BigInteger serialNumber = new BigInteger("1");// serial number for certificate
+        try {
+            //generate certificate
+            //TODO sign it by lets-encrypt
+            KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA",
+                                                                BouncyCastleProvider.PROVIDER_NAME);
+            kpg.initialize(1024);
 
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA",
-                                                            BouncyCastleProvider.PROVIDER_NAME);
-        kpg.initialize(1024);
-        KeyPair keyPair = kpg.genKeyPair();
+            KeyPair    keyPair      = kpg.genKeyPair();
+            Date       startDate    = new Date(System.currentTimeMillis());// time from which certificate is valid
+            Date       expiryDate   = new Date(System.currentTimeMillis() + 365L * 24L * 60L * 60L * 1000L);// time after which certificate is not valid
+            BigInteger serialNumber = new BigInteger("1");// serial number for certificate
+            X500Name   dnName       = new X500Name("CN=" + commonName);
+            SubjectPublicKeyInfo subPubKeyInfo = SubjectPublicKeyInfo.getInstance(keyPair.getPublic()
+                                                                                         .getEncoded());
 
-        X509V1CertificateGenerator certGen = new X509V1CertificateGenerator();
-        X500Principal              dnName  = new X500Principal("CN=" + commonName);
-        certGen.setSerialNumber(serialNumber);
-        certGen.setIssuerDN(dnName);
-        certGen.setNotBefore(startDate);
-        certGen.setNotAfter(expiryDate);
-        certGen.setSubjectDN(dnName);// note: same as issuer
-        certGen.setPublicKey(keyPair.getPublic());
-        certGen.setSignatureAlgorithm("SHA256WITHRSA");
 
-        X509Certificate cert = certGen.generate(keyPair.getPrivate(),
-                                                "BC");
+            final X509v1CertificateBuilder x509v1CertificateBuilder = new X509v1CertificateBuilder(dnName,
+                                                                                                   serialNumber,
+                                                                                                   startDate,
+                                                                                                   expiryDate,
+                                                                                                   dnName,
+                                                                                                   subPubKeyInfo);
 
-        return new RTCCertificate(fingerprint(cert),
-                                  cert);
+            AsymmetricKeyParameter privateKeyAsymKeyParam = PrivateKeyFactory.createKey(keyPair.getPrivate()
+                                                                                               .getEncoded());
+            AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder().find("SHA256withRSA");
+            AlgorithmIdentifier digAlgId = new DefaultDigestAlgorithmIdentifierFinder().find(sigAlgId);
+            ContentSigner sigGen = new BcRSAContentSignerBuilder(sigAlgId,
+                                                                 digAlgId).build(privateKeyAsymKeyParam);
+
+            final X509CertificateHolder x509CertificateHolder = x509v1CertificateBuilder.build(sigGen);
+
+            return new RTCCertificate(fingerprint(x509CertificateHolder),
+                                      keyPair,
+                                      x509CertificateHolder);
+        }
+        catch (IOException | CertificateException | NoSuchAlgorithmException | NoSuchProviderException | OperatorCreationException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private RTCCertificate(String fingerPrint,
-                           final X509Certificate certificate) {
+                           final KeyPair keyPair,
+                           final X509CertificateHolder certificate) {
         this.fingerPrint = fingerPrint;
+        this.keyPair = keyPair;
         this.certificate = certificate;
     }
 
@@ -105,7 +131,11 @@ public class RTCCertificate {
         return this.fingerPrint;
     }
 
-    public X509Certificate getCertificate() {
+    public KeyPair getKeyPair() {
+        return keyPair;
+    }
+
+    public X509CertificateHolder getCertificate() {
         return this.certificate;
     }
 }
