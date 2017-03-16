@@ -25,12 +25,17 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.Security;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Date;
 
 public class RTCCertificate {
+
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     private final String                fingerPrint;
     private final KeyPair               keyPair;

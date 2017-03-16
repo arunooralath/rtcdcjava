@@ -81,9 +81,7 @@ public class DataChannel implements AutoCloseable {
      *
      * @throws IOException
      */
-    void send(String message) throws IOException {
-        this.peerConnection.send(message,
-                                 this.streamId);
+    public void send(String message) throws IOException {
     }
 
     /**
@@ -93,9 +91,7 @@ public class DataChannel implements AutoCloseable {
      *
      * @throws IOException
      */
-    void send(ByteBuffer message) throws IOException {
-        this.peerConnection.send(message,
-                                 this.streamId);
+    public void send(ByteBuffer message) throws IOException {
     }
 
     void onOpen() {
