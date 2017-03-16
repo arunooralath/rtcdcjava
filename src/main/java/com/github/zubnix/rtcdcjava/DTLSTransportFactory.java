@@ -3,6 +3,7 @@ package com.github.zubnix.rtcdcjava;
 
 import org.bouncycastle.crypto.params.AsymmetricKeyParameter;
 import org.bouncycastle.crypto.tls.Certificate;
+import org.bouncycastle.crypto.tls.CipherSuite;
 import org.bouncycastle.crypto.tls.DTLSClientProtocol;
 import org.bouncycastle.crypto.tls.DTLSServerProtocol;
 import org.bouncycastle.crypto.tls.DTLSTransport;
@@ -38,11 +39,27 @@ public class DTLSTransportFactory {
                                                                                                                     .getEncoded());
             private final Certificate cCert = new Certificate(new org.bouncycastle.asn1.x509.Certificate[]{rtcCertificate.getCertificate().toASN1Structure()});
 
-
+            @Override
+            protected int[] getCipherSuites() {
+                return new int[]{
+                        CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
+                        CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+                        CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA384,
+                        CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256,
+                        CipherSuite.TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA,
+                        CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA,
+                        CipherSuite.TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
+                        CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
+                        CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA256,
+                        CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA256,
+                        CipherSuite.TLS_DHE_RSA_WITH_AES_256_CBC_SHA,
+                        CipherSuite.TLS_DHE_RSA_WITH_AES_128_CBC_SHA
+                };
+            }
 
             @Override
             public ProtocolVersion getServerVersion() throws IOException {
-                return ProtocolVersion.DTLSv12;
+                return ProtocolVersion.DTLSv10;
             }
 
             @Override
@@ -73,7 +90,7 @@ public class DTLSTransportFactory {
 
             @Override
             public ProtocolVersion getClientVersion() {
-                return ProtocolVersion.DTLSv12;
+                return ProtocolVersion.DTLSv10;
             }
 
             @Override
