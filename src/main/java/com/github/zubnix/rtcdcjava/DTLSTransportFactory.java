@@ -23,7 +23,7 @@ public class DTLSTransportFactory {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
-    public DTLSTransport createServerTransport(final RTCCertificate rtcCertificate,
+    static DTLSTransport createServerTransport(final RTCCertificate rtcCertificate,
                                                final DatagramTransport transport) throws IOException {
 
         final DefaultTlsServer defaultTlsServer = new DefaultTlsServer() {
@@ -55,7 +55,7 @@ public class DTLSTransportFactory {
                                                             transport);
     }
 
-    public DTLSTransport createClientTransport(final DatagramTransport transport) throws IOException {
+    static DTLSTransport createClientTransport(final DatagramTransport transport) throws IOException {
 
         final DefaultTlsClient defaultTlsClient = new DefaultTlsClient() {
 

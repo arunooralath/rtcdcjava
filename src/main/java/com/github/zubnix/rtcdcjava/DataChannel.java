@@ -1,6 +1,8 @@
 package com.github.zubnix.rtcdcjava;
 
 
+import com.github.zubnix.rtcdcjava.nativ.Usrsctp;
+
 import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -8,11 +10,11 @@ import java.util.Optional;
 
 public class DataChannel implements AutoCloseable {
 
-    private final PeerConnection peerConnection;
-    private final short          streamId;
-    private final byte           channelType;
-    private final String         label;
-    private final String         protocol;
+    private final Usrsctp usrsctp;
+    private final short   streamId;
+    private final byte    channelType;
+    private final String  label;
+    private final String  protocol;
 
     @Nonnull
     private Optional<OnDataChannelOpen>              onDataChannelOpen              = Optional.empty();
@@ -25,17 +27,25 @@ public class DataChannel implements AutoCloseable {
     @Nonnull
     private Optional<OnDataChannelErrorMessage>      onDataChannelErrorMessage      = Optional.empty();
 
-    DataChannel(final PeerConnection peerConnection,
+    DataChannel(final Usrsctp usrsctp,
                 final short streamId,
                 final byte channelType,
                 final String label,
                 final String protocol) {
+        this.usrsctp = usrsctp;
 
-        this.peerConnection = peerConnection;
         this.streamId = streamId;
         this.channelType = channelType;
         this.label = label;
         this.protocol = protocol;
+    }
+
+    static DataChannel create(final Usrsctp usrsctp) {
+        return new DataChannel(usrsctp,
+                               (short) 0,
+                               (byte) 0,
+                               "",
+                               "");
     }
 
     /**

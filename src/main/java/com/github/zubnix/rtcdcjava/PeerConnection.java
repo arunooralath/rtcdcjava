@@ -1,9 +1,10 @@
 package com.github.zubnix.rtcdcjava;
 
 
+import com.github.zubnix.rtcdcjava.nativ.Usrsctp;
+
 import javax.annotation.Nonnull;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +12,7 @@ public class PeerConnection {
 
     private final DTLSTransportFactory dtlsTransportFactory = new DTLSTransportFactory();
 
+    private final Usrsctp          usrsctp;
     private final RTCConfiguration rtcConfiguration;
 
     @Nonnull
@@ -32,26 +34,32 @@ public class PeerConnection {
                                                                                 19302));
         IcePortRange icePortRange = IcePortRange.create(1025,
                                                         65535);
-        String               iceUfrag        = "";
-        String               icePassword     = "";
-        List<RTCCertificate> rtcCertificates = Collections.singletonList(RTCCertificate.generate("rtcdcjava"));
+        String         iceUfrag       = "";
+        String         icePassword    = "";
+        RTCCertificate rtcCertificate = RTCCertificate.generate("rtcdcjava");
 
         final RTCConfiguration rtcConfiguration = RTCConfiguration.create(rtcTurnServers,
                                                                           icePortRange,
                                                                           iceUfrag,
                                                                           icePassword,
-                                                                          rtcCertificates);
+                                                                          rtcCertificate);
 
         return create(rtcConfiguration);
     }
 
     public static PeerConnection create(RTCConfiguration rtcConfiguration) {
 
-        return new PeerConnection(rtcConfiguration);
+        final Usrsctp usrsctp = new Usrsctp();
+        new Usrsctp_Symbols().link();
+
+
+        return new PeerConnection(usrsctp,
+                                  rtcConfiguration);
     }
 
-    private PeerConnection(final RTCConfiguration rtcConfiguration) {
-
+    private PeerConnection(final Usrsctp usrsctp,
+                           final RTCConfiguration rtcConfiguration) {
+        this.usrsctp = usrsctp;
         this.rtcConfiguration = rtcConfiguration;
     }
 
@@ -108,6 +116,12 @@ public class PeerConnection {
     }
 
     public DataChannel createDataChannel() {
+
+
+
+
+
+
         return null;
     }
 }

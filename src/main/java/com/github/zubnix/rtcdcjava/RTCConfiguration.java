@@ -11,12 +11,12 @@ public abstract class RTCConfiguration {
                                           IcePortRange icePortRange,
                                           String iceUfrag,
                                           String icePwd,
-                                          List<RTCCertificate> rtcCertificates) {
+                                          RTCCertificate rtcCertificate) {
         return new AutoValue_RTCConfiguration(rtcTurnServers,
                                               icePortRange,
                                               iceUfrag,
                                               icePwd,
-                                              rtcCertificates);
+                                              rtcCertificate);
     }
 
     public abstract List<RTCTurnServer> getTurnServers();
@@ -27,5 +27,5 @@ public abstract class RTCConfiguration {
 
     public abstract String getIcePassword();
 
-    public abstract List<RTCCertificate> getRtcCertificates();
+    public abstract RTCCertificate getRtcCertificate();
 }
